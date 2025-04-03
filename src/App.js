@@ -340,6 +340,97 @@ function Tips() {
   );
 }
 
+// Exercise Timer Component
+function ExerciseTimer({ exerciseText }) {
+  const [isRunning, setIsRunning] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [originalTime, setOriginalTime] = useState(0);
+  
+  // Extract time from exercise text
+  const extractTime = () => {
+    // Look for time patterns like "30 seconds", "45 sec", "2 minutes", "2 min"
+    const secondsMatch = exerciseText.match(/(\d+)\s*(?:seconds|secs?)/i);
+    const minutesMatch = exerciseText.match(/(\d+)\s*(?:minutes|mins?)/i);
+    
+    let totalSeconds = 0;
+    
+    if (secondsMatch) {
+      totalSeconds += parseInt(secondsMatch[1], 10);
+    }
+    
+    if (minutesMatch) {
+      totalSeconds += parseInt(minutesMatch[1], 10) * 60;
+    }
+    
+    // Default to 30 seconds if no time found
+    return totalSeconds > 0 ? totalSeconds : 30;
+  };
+  
+  // Format time as MM:SS
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+  
+  useEffect(() => {
+    const time = extractTime();
+    setTimeLeft(time);
+    setOriginalTime(time);
+  }, [exerciseText]);
+  
+  useEffect(() => {
+    let interval = null;
+    
+    if (isRunning && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft(timeLeft => timeLeft - 1);
+      }, 1000);
+    } else if (isRunning && timeLeft === 0) {
+      setIsRunning(false);
+      // Play sound when timer completes
+      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+      audio.play().catch(e => console.log('Audio play failed:', e));
+    }
+    
+    return () => clearInterval(interval);
+  }, [isRunning, timeLeft]);
+  
+  const startStopTimer = () => {
+    setIsRunning(!isRunning);
+  };
+  
+  const resetTimer = () => {
+    setIsRunning(false);
+    setTimeLeft(originalTime);
+  };
+  
+  const progress = (timeLeft / originalTime) * 100;
+  
+  return (
+    <div className="exercise-timer">
+      <div className="timer-display">
+        <div className="timer-progress" style={{ width: `${progress}%` }}></div>
+        <span className="timer-time">{formatTime(timeLeft)}</span>
+      </div>
+      <div className="timer-controls">
+        <button 
+          className="timer-button" 
+          onClick={startStopTimer}
+        >
+          {isRunning ? 'Pause' : 'Start'}
+        </button>
+        <button 
+          className="timer-button" 
+          onClick={resetTimer}
+        >
+          Reset
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // Workout Detail Component
 function WorkoutDetail() {
   const { weekNum, workoutNum } = useParams();
@@ -979,97 +1070,6 @@ function WorkoutDetail() {
           </div>
         ))}
       </div>
-      
-      {/* Exercise Timer Component */}
-      function ExerciseTimer({ exerciseText }) {
-        const [isRunning, setIsRunning] = useState(false);
-        const [timeLeft, setTimeLeft] = useState(0);
-        const [originalTime, setOriginalTime] = useState(0);
-        
-        // Extract time from exercise text
-        const extractTime = () => {
-          // Look for time patterns like "30 seconds", "45 sec", "2 minutes", "2 min"
-          const secondsMatch = exerciseText.match(/(\d+)\s*(?:seconds|secs?)/i);
-          const minutesMatch = exerciseText.match(/(\d+)\s*(?:minutes|mins?)/i);
-          
-          let totalSeconds = 0;
-          
-          if (secondsMatch) {
-            totalSeconds += parseInt(secondsMatch[1], 10);
-          }
-          
-          if (minutesMatch) {
-            totalSeconds += parseInt(minutesMatch[1], 10) * 60;
-          }
-          
-          // Default to 30 seconds if no time found
-          return totalSeconds > 0 ? totalSeconds : 30;
-        };
-        
-        // Format time as MM:SS
-        const formatTime = (seconds) => {
-          const mins = Math.floor(seconds / 60);
-          const secs = seconds % 60;
-          return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        };
-        
-        useEffect(() => {
-          const time = extractTime();
-          setTimeLeft(time);
-          setOriginalTime(time);
-        }, [exerciseText]);
-        
-        useEffect(() => {
-          let interval = null;
-          
-          if (isRunning && timeLeft > 0) {
-            interval = setInterval(() => {
-              setTimeLeft(timeLeft => timeLeft - 1);
-            }, 1000);
-          } else if (isRunning && timeLeft === 0) {
-            setIsRunning(false);
-            // Play sound when timer completes
-            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-            audio.play().catch(e => console.log('Audio play failed:', e));
-          }
-          
-          return () => clearInterval(interval);
-        }, [isRunning, timeLeft]);
-        
-        const startStopTimer = () => {
-          setIsRunning(!isRunning);
-        };
-        
-        const resetTimer = () => {
-          setIsRunning(false);
-          setTimeLeft(originalTime);
-        };
-        
-        const progress = (timeLeft / originalTime) * 100;
-        
-        return (
-          <div className="exercise-timer">
-            <div className="timer-display">
-              <div className="timer-progress" style={{ width: `${progress}%` }}></div>
-              <span className="timer-time">{formatTime(timeLeft)}</span>
-            </div>
-            <div className="timer-controls">
-              <button 
-                className="timer-button" 
-                onClick={startStopTimer}
-              >
-                {isRunning ? 'Pause' : 'Start'}
-              </button>
-              <button 
-                className="timer-button" 
-                onClick={resetTimer}
-              >
-                Reset
-              </button>
-            </div>
-          </div>
-        );
-      }
       
       <div className="complete-workout">
         <button 
