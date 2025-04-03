@@ -11,7 +11,7 @@ function App() {
     <Router>
       <div className="app">
         <header className="app-header">
-          <h1>Tough Mudder 15k Training Plan</h1>
+          <h1>Tough Mudder 15k Team Journey</h1>
           <nav>
             <Link to="/">Home</Link>
             <Link to="/weeks">Training Weeks</Link>
@@ -43,29 +43,32 @@ function Home() {
     <div className="home">
       <h2>5-Week Tough Mudder Training Plan</h2>
       <div className="intro-card">
-        <h3>Get Ready for the Mud!</h3>
-        <p>Welcome to your 5-week training plan for the upcoming 15k Tough Mudder event. This app will guide you through workouts designed to build endurance, strength, and obstacle-specific skills needed to successfully complete the course.</p>
+        <h3>Let's Have Fun in the Mud Together!</h3>
+        <p>Welcome to your friendly 5-week training plan for our upcoming Tough Mudder adventure! This isn't about racing or competing - it's about having fun, supporting each other, and enjoying the experience together as a team.</p>
         
-        <h3>What to Expect from Tough Mudder:</h3>
+        <h3>What We'll Experience Together:</h3>
         <ul>
-          <li>15km (9.3 miles) of running</li>
-          <li>20+ obstacles requiring climbing, crawling, carrying, and teamwork</li>
-          <li>Mud, water, and potentially cold conditions</li>
-          <li>3.5-4 hours of continuous activity</li>
+          <li>A beautiful 15km (9.3 miles) journey with plenty of laughs along the way</li>
+          <li>20+ teamwork-based obstacles where we'll help each other shine</li>
+          <li>Mud, water, and memories that will last a lifetime</li>
+          <li>3.5-4 hours of team bonding and fun challenges</li>
         </ul>
         
-        <h3>How to Use This Plan:</h3>
+        <h3>How to Use This Friendly Plan:</h3>
         <ul>
-          <li>Complete 3 workouts each week on non-consecutive days</li>
-          <li>Scale exercises to your fitness level (modifications provided)</li>
-          <li>Track your progress by checking off completed workouts</li>
-          <li>Focus on proper form and technique to prevent injuries</li>
-          <li>Get adequate rest between training sessions</li>
+          <li>Aim for 3 enjoyable workouts each week - any days that work for you!</li>
+          <li>Modify everything to your comfort level - this is about feeling good</li>
+          <li>Track your progress at your own pace - celebrate small wins!</li>
+          <li>Focus on having fun and staying safe rather than pushing too hard</li>
+          <li>Rest plenty between sessions - recovery is where the magic happens</li>
         </ul>
+        
+        <h3>Remember:</h3>
+        <p>This event is all about teamwork and having fun together! We'll be moving at a comfortable pace, taking breaks when needed, and supporting each other through every obstacle. No one gets left behind!</p>
         
         <div className="action-buttons">
-          <Link to="/weeks" className="button primary">Start Training</Link>
-          <Link to="/tips" className="button secondary">View Race Tips</Link>
+          <Link to="/weeks" className="button primary">Start Our Journey</Link>
+          <Link to="/tips" className="button secondary">Helpful Tips</Link>
         </div>
       </div>
     </div>
@@ -76,7 +79,8 @@ function Home() {
 function WeeksList() {
   return (
     <div className="weeks-list">
-      <h2>Training Schedule</h2>
+      <h2>Our Team Journey</h2>
+      <p className="weeks-intro">Each week builds on the last, but remember - this is about having fun and supporting each other, not about pushing to exhaustion. Go at your own pace!</p>
       <div className="weeks-grid">
         {[1, 2, 3, 4, 5].map(weekNum => (
           <WeekCard key={weekNum} weekNum={weekNum} />
@@ -327,9 +331,10 @@ function Tips() {
       </div>
       
       <div className="final-thoughts">
-        <h3>Final Thoughts</h3>
-        <p>Remember that Tough Mudder is about challenging yourself and working together as a team. The goal is to finish, have fun, and help each other overcome obstacles. This training plan will help build your physical preparedness, but your mental toughness and teamwork will carry you through on race day.</p>
-        <p>Good luck, stay safe, and enjoy the mud!</p>
+        <h3>Final Encouraging Thoughts</h3>
+        <p>Remember that Tough Mudder is about having a great time and supporting each other as a team! There's no pressure to race through - we'll take our time, help each other over every wall, and share plenty of laughs (and mud) along the way.</p>
+        <p>This preparation journey is about building confidence together, not pushing ourselves to exhaustion. Every bit of training you do is a win, and we'll celebrate all progress, big or small!</p>
+        <p>We're going to have an amazing day out, create unforgettable memories, and cross that finish line together with smiles on our muddy faces!</p>
       </div>
     </div>
   );
@@ -894,8 +899,12 @@ function WorkoutDetail() {
             }
           }}
         >
-          {calculateProgress() === 100 ? 'Workout Complete!' : 'Complete All Exercises'}
+          {calculateProgress() === 100 ? 'Awesome Job! Workout Complete! 🎉' : 'Keep Going - You Got This!'}
         </button>
+        
+        <p className="workout-encouragement">
+          Remember: Any movement is better than none! Modify exercises as needed and celebrate your progress.
+        </p>
       </div>
     </div>
   );
