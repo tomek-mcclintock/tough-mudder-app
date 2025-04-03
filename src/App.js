@@ -796,10 +796,30 @@ function WorkoutDetail() {
     setCheckedExercises(newCheckedExercises);
     localStorage.setItem(`week${weekInt}workout${workoutInt}Exercises`, JSON.stringify(newCheckedExercises));
     
-    // Calculate progress
-    const totalExercises = currentWorkout.sections.reduce((total, section) => total + section.exercises.length, 0);
-    const checkedCount = Object.values(newCheckedExercises).filter(Boolean).length;
-    const percent = Math.round((checkedCount / totalExercises) * 100);
+    updateProgress(newCheckedExercises);
+  };
+  
+  const updateProgress = (newCheckedExercises) => {
+    // Count main exercises
+    const mainExerciseCount = currentWorkout.sections.reduce((total, section) => total + section.exercises.length, 0);
+    
+    // Count sub-exercises
+    let subExerciseCount = 0;
+    currentWorkout.sections.forEach((section, sectionIndex) => {
+      section.exercises.forEach((exercise, exerciseIndex) => {
+        const subExercises = exercise.split('\n').slice(1).filter(line => line.trim() && line.trim() !== '-');
+        subExerciseCount += subExercises.length;
+      });
+    });
+    
+    // Total exercises (main + sub)
+    const totalExercises = mainExerciseCount + subExerciseCount;
+    
+    // Count completed exercises
+    const checkedCount = Object.keys(newCheckedExercises).filter(key => newCheckedExercises[key]).length;
+    
+    // Calculate percentage
+    const percent = totalExercises > 0 ? Math.round((checkedCount / totalExercises) * 100) : 0;
     
     // Save progress for the workout
     const savedProgress = JSON.parse(localStorage.getItem(`week${weekInt}Progress`) || '{"workouts":[0,0,0],"total":0}');
@@ -813,9 +833,26 @@ function WorkoutDetail() {
   };
   
   const calculateProgress = () => {
-    const totalExercises = currentWorkout.sections.reduce((total, section) => total + section.exercises.length, 0);
-    const checkedCount = Object.values(checkedExercises).filter(Boolean).length;
-    return Math.round((checkedCount / totalExercises) * 100);
+    // Count main exercises
+    const mainExerciseCount = currentWorkout.sections.reduce((total, section) => total + section.exercises.length, 0);
+    
+    // Count sub-exercises
+    let subExerciseCount = 0;
+    currentWorkout.sections.forEach((section, sectionIndex) => {
+      section.exercises.forEach((exercise, exerciseIndex) => {
+        const subExercises = exercise.split('\n').slice(1).filter(line => line.trim() && line.trim() !== '-');
+        subExerciseCount += subExercises.length;
+      });
+    });
+    
+    // Total exercises (main + sub)
+    const totalExercises = mainExerciseCount + subExerciseCount;
+    
+    // Count completed exercises
+    const checkedCount = Object.keys(checkedExercises).filter(key => checkedExercises[key]).length;
+    
+    // Calculate percentage
+    return totalExercises > 0 ? Math.round((checkedCount / totalExercises) * 100) : 0;
   };
   
   return (
@@ -862,25 +899,79 @@ function WorkoutDetail() {
             <div className="exercise-list">
               {section.exercises.map((exercise, exerciseIndex) => {
                 const exerciseKey = `s${sectionIndex}e${exerciseIndex}`;
+                
+                // Process exercise text to separate main exercise from sub-exercises
+                const lines = exercise.split('\n');
+                const mainExercise = lines[0];
+                const subExercises = lines.slice(1);
+                
+                // Check if this is a timed exercise
+                const hasTimer = mainExercise.includes('seconds') || 
+                                 mainExercise.includes('minutes') ||
+                                 subExercises.some(line => 
+                                   line.includes('seconds') || 
+                                   line.includes('minutes') || 
+                                   line.includes(' sec') || 
+                                   line.includes(' min'));
+                
                 return (
                   <div 
                     key={exerciseIndex} 
                     className={`exercise-item ${checkedExercises[exerciseKey] ? 'checked' : ''}`}
                   >
-                    <label className="exercise-label">
-                      <input 
-                        type="checkbox" 
-                        checked={!!checkedExercises[exerciseKey]} 
-                        onChange={() => handleCheckExercise(sectionIndex, exerciseIndex)}
-                      />
-                      <div className="exercise-text">
-                        {exercise.split('\n').map((line, i) => (
-                          <p key={i} className={i === 0 ? 'exercise-main' : 'exercise-detail'}>
-                            {line}
-                          </p>
-                        ))}
+                    <div className="exercise-main-container">
+                      <label className="exercise-label">
+                        <input 
+                          type="checkbox" 
+                          checked={!!checkedExercises[exerciseKey]} 
+                          onChange={() => handleCheckExercise(sectionIndex, exerciseIndex)}
+                        />
+                        <div className="exercise-text">
+                          <p className="exercise-main">{mainExercise}</p>
+                        </div>
+                      </label>
+                      
+                      {hasTimer && (
+                        <ExerciseTimer exerciseText={exercise} />
+                      )}
+                    </div>
+                    
+                    {subExercises.length > 0 && (
+                      <div className="sub-exercises">
+                        {subExercises.map((subExercise, subIndex) => {
+                          // Generate a unique key for this sub-exercise
+                          const subExerciseKey = `s${sectionIndex}e${exerciseIndex}sub${subIndex}`;
+                          
+                          // Skip empty lines or those that are just bullet points
+                          if (!subExercise.trim() || subExercise.trim() === '-') {
+                            return null;
+                          }
+                          
+                          return (
+                            <div key={subIndex} className="sub-exercise-item">
+                              <label className="sub-exercise-label">
+                                <input 
+                                  type="checkbox" 
+                                  checked={!!checkedExercises[subExerciseKey]} 
+                                  onChange={() => {
+                                    const newCheckedExercises = {
+                                      ...checkedExercises,
+                                      [subExerciseKey]: !checkedExercises[subExerciseKey]
+                                    };
+                                    setCheckedExercises(newCheckedExercises);
+                                    localStorage.setItem(
+                                      `week${weekInt}workout${workoutInt}Exercises`, 
+                                      JSON.stringify(newCheckedExercises)
+                                    );
+                                  }}
+                                />
+                                <span className="sub-exercise-text">{subExercise}</span>
+                              </label>
+                            </div>
+                          );
+                        })}
                       </div>
-                    </label>
+                    )}
                   </div>
                 );
               })}
@@ -888,6 +979,97 @@ function WorkoutDetail() {
           </div>
         ))}
       </div>
+      
+      {/* Exercise Timer Component */}
+      function ExerciseTimer({ exerciseText }) {
+        const [isRunning, setIsRunning] = useState(false);
+        const [timeLeft, setTimeLeft] = useState(0);
+        const [originalTime, setOriginalTime] = useState(0);
+        
+        // Extract time from exercise text
+        const extractTime = () => {
+          // Look for time patterns like "30 seconds", "45 sec", "2 minutes", "2 min"
+          const secondsMatch = exerciseText.match(/(\d+)\s*(?:seconds|secs?)/i);
+          const minutesMatch = exerciseText.match(/(\d+)\s*(?:minutes|mins?)/i);
+          
+          let totalSeconds = 0;
+          
+          if (secondsMatch) {
+            totalSeconds += parseInt(secondsMatch[1], 10);
+          }
+          
+          if (minutesMatch) {
+            totalSeconds += parseInt(minutesMatch[1], 10) * 60;
+          }
+          
+          // Default to 30 seconds if no time found
+          return totalSeconds > 0 ? totalSeconds : 30;
+        };
+        
+        // Format time as MM:SS
+        const formatTime = (seconds) => {
+          const mins = Math.floor(seconds / 60);
+          const secs = seconds % 60;
+          return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        };
+        
+        useEffect(() => {
+          const time = extractTime();
+          setTimeLeft(time);
+          setOriginalTime(time);
+        }, [exerciseText]);
+        
+        useEffect(() => {
+          let interval = null;
+          
+          if (isRunning && timeLeft > 0) {
+            interval = setInterval(() => {
+              setTimeLeft(timeLeft => timeLeft - 1);
+            }, 1000);
+          } else if (isRunning && timeLeft === 0) {
+            setIsRunning(false);
+            // Play sound when timer completes
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+            audio.play().catch(e => console.log('Audio play failed:', e));
+          }
+          
+          return () => clearInterval(interval);
+        }, [isRunning, timeLeft]);
+        
+        const startStopTimer = () => {
+          setIsRunning(!isRunning);
+        };
+        
+        const resetTimer = () => {
+          setIsRunning(false);
+          setTimeLeft(originalTime);
+        };
+        
+        const progress = (timeLeft / originalTime) * 100;
+        
+        return (
+          <div className="exercise-timer">
+            <div className="timer-display">
+              <div className="timer-progress" style={{ width: `${progress}%` }}></div>
+              <span className="timer-time">{formatTime(timeLeft)}</span>
+            </div>
+            <div className="timer-controls">
+              <button 
+                className="timer-button" 
+                onClick={startStopTimer}
+              >
+                {isRunning ? 'Pause' : 'Start'}
+              </button>
+              <button 
+                className="timer-button" 
+                onClick={resetTimer}
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        );
+      }
       
       <div className="complete-workout">
         <button 
