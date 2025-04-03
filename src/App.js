@@ -43,7 +43,7 @@ function Home() {
     <div className="home">
       <h2>5-Week Tough Mudder Training Plan</h2>
       <div className="intro-card">
-        <h3>Let's Have Fun in the Mud Together!</h3>
+        <h3>Let's Crush Some Mud!</h3>
         <p>Welcome to your friendly 5-week training plan for our upcoming Tough Mudder adventure! This isn't about racing or competing - it's about having fun, supporting each other, and enjoying the experience together as a team.</p>
         
         <h3>What We'll Experience Together:</h3>
