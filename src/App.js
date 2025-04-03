@@ -4,6 +4,8 @@ import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate } 
 import './App.css';
 
 // Main App Component
+
+// Main App Component
 function App() {
   return (
     <Router>
@@ -32,6 +34,8 @@ function App() {
     </Router>
   );
 }
+
+export default App;
 
 // Home Component
 function Home() {
